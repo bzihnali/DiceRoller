@@ -2,102 +2,227 @@ const helper = require('./helper.js');
 const React = require('react');
 const { useState, useEffect } = React;
 const { createRoot } = require('react-dom/client');
+import {
+    Chart as ChartJS,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
 
-const handleDie = (e, onDieAdded) => {
+import { Bar } from 'react-chartjs-2';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+const handleRoll = (e, onRollAdded) => {
     e.preventDefault();
     helper.hideError();
 
-    const name = e.target.querySelector('#dieName').value;
-    const age = e.target.querySelector('#dieAge').value;
-    const level = e.target.querySelector('#dieLevel').value;
+    const rollString = e.target.querySelector('#rollString').value;
 
-    if (!name || !age || !level) {
+    if (!rollString) {
         helper.handleError('All fields are required');
         return false;
     }
 
-    helper.sendPost(e.target.action, { name, age, level }, onDieAdded);
+    helper.sendPost(e.target.action, { rollstring: rollString }, onRollAdded);
     return false;
 };
 
-const DieForm = (props) => {
+const RollForm = (props) => {
     return (
-        <form id="dieForm"
-            onSubmit={(e) => handleDie(e, props.triggerReload)}
-            name="dieForm"
+        <form id="rollForm"
+            onSubmit={(e) => handleRoll(e, props.triggerReload)}
+            name="rollForm"
             action="/maker"
             method="POST"
-            className="dieForm">
+            className="rollForm">
 
-            <label htmlFor="name">Name: </label>
-            <input id="dieName" type="text" name="name" placeholder="Die Name" />
+            <label htmlFor="name"></label>
+            <input id="rollString" type="text" name="name" placeholder="Roll String (e.x. 4d8+9d[1,2,5]+7d1)" />
 
-            <label htmlFor="age">Age: </label>
-            <input id="dieAge" type="number" min="0" name="age" />
-
-            <label htmlFor="level">Level: </label>
-            <input id="dieLevel" type="number" min="0" name="level" />
-
-            <input className="makeDieSubmit" type="submit" value="Make Die" />
+            <input className="makeRollSubmit" type="submit" value="Add Roll" />
         </form>
     );
 };
 
-const DieList = (props) => {
-    const [dice, setDice] = useState(props.dice);
+const RollList = (props) => {
+    const [rolls, setRolls] = useState(props.rolls);
 
     useEffect(() => {
-        const loadDiceFromServer = async () => {
-            const response = await fetch('/getDice');
+        const loadRollsFromServer = async () => {
+            const response = await fetch('/getRolls');
             const data = await response.json();
-            setDice(data.dice);
+            setRolls(data.rolls.reverse());
         };
-        loadDiceFromServer();
-    }, [props.reloadDice]);
+        loadRollsFromServer();
+    }, [props.reloadRolls]);
 
-    if (dice.length === 0) {
+    if (rolls.length === 0) {
         return (
-            <div className="dieList">
-                <h3 className="emptyDie">No Dice Yet!</h3>
+            <div className="rollList">
+                <h3 className="emptyRoll">No Rolls Yet!</h3>
             </div>
         );
     }
 
-    const dieNodes = dice.map(die => {
+    const rollNodes = rolls.map(roll => {
         return (
-            <div key={die.id} className="die">
-                <img src="/assets/img/dieface.jpeg" alt="die face" className="dieFace" onClick={(e) => {
-                    props.deleteDie(die._id).then(props.triggerReload);
-                    
-                }}/>
-                <h3 className="dieName">Name: {die.name}</h3>
-                <h3 className="dieAge">Age: {die.age}</h3>
-                <h3 className="dieLevel">Level: {die.level ?? 1}</h3>
+            <div key={roll.id} className="roll">
+                <h3 className="rollName">{roll.rollstring.replace(/\+/g, ' + ')}</h3>
+                <button className="rollDiceButton" onClick={(e) => {
+                    props.generateRollResults(roll._id).then(props.triggerReload);
+                }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M274.9 34.3c-28.1-28.1-73.7-28.1-101.8 0L34.3 173.1c-28.1 28.1-28.1 73.7 0 101.8L173.1 413.7c28.1 28.1 73.7 28.1 101.8 0L413.7 274.9c28.1-28.1 28.1-73.7 0-101.8L274.9 34.3zM200 224a24 24 0 1 1 48 0 24 24 0 1 1 -48 0zM96 200a24 24 0 1 1 0 48 24 24 0 1 1 0-48zM224 376a24 24 0 1 1 0-48 24 24 0 1 1 0 48zM352 200a24 24 0 1 1 0 48 24 24 0 1 1 0-48zM224 120a24 24 0 1 1 0-48 24 24 0 1 1 0 48zm96 328c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-192c0-35.3-28.7-64-64-64l-114.3 0c11.6 36 3.1 77-25.4 105.5L320 413.8l0 34.2zM480 328a24 24 0 1 1 0 48 24 24 0 1 1 0-48z" /></svg></button>
+                <button className="deleteDiceButton" onClick={(e) => {
+                    props.deleteRoll(roll._id).then(props.triggerReload);
+                }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z" /></svg>
+                </button>
             </div>
         );
     });
 
     return (
-        <div className="dieList">
-            {dieNodes}
+        <div className="rollList">
+            {rollNodes}
         </div>
     );
 };
 
+export default function RollDistributionChart({ diceRolls, highlightValue, mean, quartiles, tenths }) {
+    // Transform dataMap (object) into labels and values
+    const labels = Object.keys(diceRolls).map(Number).sort((a, b) => a - b).map(String);
+    const values = labels.map(label => diceRolls[label]);
+
+    // Build dynamic bar colors: highlight the one matching highlightValue
+    const backgroundColors = labels.map((label) => {
+        let rollCount = Object.keys(diceRolls).length;
+        if (Number(label) === Number(highlightValue)) {
+            return 'rgba(255, 99, 132, 0.8)'
+        } else {
+            if (rollCount >= 10) {
+                if (Number(label) === Math.ceil(Number(mean))) {
+                    return 'rgba(255, 207, 32, 0.8)'
+                }
+            }
+            if (rollCount >= 25) {
+                if (quartiles.includes(Number(label))) {
+                    return 'rgba(255, 239, 99, 0.8)'
+                }
+            }
+            if (rollCount >= 50) {
+                if (tenths.includes(Number(label))) {
+                    return 'rgba(203, 255, 99, 0.8)'
+                }
+            }
+            return 'rgba(85, 208, 227, 0.81)'
+        }
+    }
+    );
+
+    const chartData = {
+        labels,
+        datasets: [
+            {
+                label: 'Dice Roll Outcomes',
+                data: values,
+                backgroundColor: backgroundColors,
+            },
+        ],
+    };
+
+    const options = {
+        animation: {
+            duration: 0
+        },
+        responsive: true,
+        scales: {
+            y: {
+                display: false,
+                beginAtZero: true,
+                title: {
+                    display: false,
+                    text: 'Count',
+                },
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Roll Total',
+                },
+                ticks: {
+                    maxTicksLimit: 20, // Prevent clutter on x-axis
+                },
+            },
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Dice Roll Distribution',
+            },
+            legend: {
+                display: false,
+            },
+        },
+    };
+
+    return <Bar data={chartData} options={options} />;
+}
+
 const App = () => {
-    const [reloadDice, setReloadDice] = useState(false);
+    const [reloadRolls, setReloadRolls] = useState(false);
 
     return (
-        <div>
-            <div id="makeDie">
-                <DieForm triggerReload={() => {setReloadDice(!reloadDice)}} />
+        <div id="mainContainer">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></link>
+            <div id="rollInputs">
+                <div id="makeRoll">
+                    <RollForm triggerReload={() => { setReloadRolls(!reloadRolls) }} />
+                </div>
+                <div id="rolls">
+                    <RollList rolls={[]} triggerReload={() => { setReloadRolls(!reloadRolls) }} reloadRolls={reloadRolls}
+                        deleteRoll={
+                            async (id) => {
+                                await helper.sendPost('/delete', { "id": id })
+                            }
+                        }
+                        generateRollResults={
+                            async (id) => {
+                                await helper.sendPost('/generateRollResults', { "id": id },
+                                    (json) => {
+                                        document.getElementById("main-result").innerHTML = `Your roll was...`
+                                        document.getElementById("final-roll").innerHTML = `<b>${json.rollTotal}</b>`
+                                        document.getElementById("roll-numbers").innerHTML = `Dice Values: ${json.rolls.join(", ")}`
+                                        document.getElementById("roll-statistics").innerHTML = `Your roll was better than ${Math.round(100 * json.rollPercentile) / 100}% of all possible rolls!<br>
+                                                                                                Avg. Roll: ${json.rollMean}<br>
+                                                                                                25% Roll:  ${json.rollQuartiles[0]}<br>
+                                                                                                75% Roll:  ${json.rollQuartiles[1]}<br>
+                                                                                                10% Roll:  ${json.rollTenths[0]}<br>
+                                                                                                90% Roll:  ${json.rollTenths[1]}`
+
+                                        document.getElementById("statistics").innerHTML = ""
+                                        createRoot(document.getElementById("statistics")).render(<RollDistributionChart diceRolls={json.rollPMF} highlightValue={json.rollTotal} mean={json.rollMean} quartiles={json.rollQuartiles} tenths={json.rollTenths} />)
+                                    })
+                            }
+                        } />
+                </div>
             </div>
-            <div id="dice">
-                <DieList dice={[]} triggerReload={() => {setReloadDice(!reloadDice)}} reloadDice={reloadDice} deleteDie={
-                    async (id) => {
-                        await helper.sendPost('/delete', { "id": id })
-                    }
-                } />
+
+            <div id="results">
+                <h2 id="main-result"></h2>
+                <h1 id="final-roll"></h1>
+                <h3 id="roll-numbers"></h3>
+                <div id="premium-output" class="hidden">
+                    <h3 id="roll-statistics"></h3>
+                    <div id="statistics">
+
+                    </div>
+                </div>
+                <button id="togglePremium" onClick={(e) => {
+                    document.getElementById("premium-output").classList.toggle("hidden");
+                }}>Toggle Premium Output</button>
             </div>
         </div>
     );

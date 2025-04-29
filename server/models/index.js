@@ -1,2 +1,2 @@
 module.exports.Account = require('./Account.js');
-module.exports.Die = require('./Die.js');
+module.exports.Roll = require('./Roll.js');

@@ -16,7 +16,7 @@ const router = require('./router.js');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
-const dbURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1/DieMaker';
+const dbURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1/RollMaker';
 mongoose.connect(dbURI).catch((err) => {
   if (err) {
     console.log('Could not connect to database');
@@ -45,7 +45,7 @@ redisClient.connect().then(() => {
     store: new RedisStore({
       client: redisClient,
     }),
-    secret: 'Die Arigato',
+    secret: 'Roll-mo Arigato',
     resave: false,
     saveUninitialized: false,
   }));

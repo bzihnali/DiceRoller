@@ -1,3 +1,7 @@
+* {
+    font-family: "Kode Mono"
+}
+
 html, body {
     height: 100%;
     width: 100%;
@@ -12,10 +16,6 @@ html, body {
     padding-top: 5px;
     float:left;
     border-radius: 8px;
-}
-
-#dieForm > input {
-    width: 100px;
 }
 
 nav {
@@ -37,6 +37,19 @@ nav:nth-child(1) {
     float: left;
 }
 
+#loginForm, #signupForm {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#loginForm > label, #signupForm > label {
+    text-align: center;
+    width: 50%;
+    font-size: 2em;
+}
+
 .navlink a, .navlink a:link, .navlink a:visited, .navlink a:hover, .navlink a:active {
     color: white;
     text-decoration: none;
@@ -51,26 +64,7 @@ nav:nth-child(1) {
     background-color: #66bdff;
 }
 
-.dieForm {
-    border: 2px solid #338acc;
-    height: 35px;
-    width: 700px;
-    margin-top:0px;
-    padding-top:10px;
-    background-color: #55acee;
-    border-bottom-right-radius: 4px;
-    border-top-right-radius: 4px;
-}
-
-.dieForm label {
-    display: inline-block;
-    width: 75px;
-    margin-left: 10px;
-    font-size: 1.2em;
-    color: white;
-}
-
-.makeDieSubmit {
+.makeRollSubmit {
     transition: background-color 0.4s ease;
     display: inline;
     width: 90px;
@@ -80,11 +74,11 @@ nav:nth-child(1) {
     text-decoration: none;
 }
 
-.makeDieSubmit:link, .makeDieSubmit:visited, .makeDieSubmit:hover, .makeDieSubmit:active {
+.makeRollSubmit:link, .makeRollSubmit:visited, .makeRollSubmit:hover, .makeRollSubmit:active {
     color: white;
 }
 
-.makeDieSubmit:hover {
+.makeRollSubmit:hover {
     transition: background-color 0.4s ease;
     background-color: #338acc;
 }
@@ -115,8 +109,8 @@ nav:nth-child(1) {
     text-align: center;
     margin: 0 auto;
     margin-top: 14px;
-    font-size: 1.2em;
-    width: 100px;
+    font-size: 3em;
+    width: 15vw;
     background-color: #55acee;
     border-radius: 2px;
     border-color: #66acee;
@@ -136,8 +130,10 @@ nav:nth-child(1) {
 
 #user, #pass, #pass2 {
     text-align: center;
-    font-size: 1.1em;
-    width: 180px;
+    font-size: 2em;
+    width: 20vw;
+    height: 2vw;
+    border: 1px solid #3e7dac;
     border-radius: 6px;
 }
 
@@ -150,7 +146,11 @@ nav:nth-child(1) {
     display: none;
 }
 
-#dieMessage {
+#roll-statistics {
+    text-align: center;
+}
+
+#rollMessage {
     top: 250px;
     width: 250px;
     height: 650px;
@@ -160,7 +160,7 @@ nav:nth-child(1) {
     overflow: hidden;
 }
 
-#dieMessage h3 {
+#rollMessage h3 {
     width: 200px;
     position: absolute;
     top: 0px;
@@ -180,7 +180,7 @@ nav:nth-child(1) {
     font-style: italic;
 }
 
-#die {
+#roll {
     z-index: 225;
     margin-top: -20px;
     margin-left: 135px;
@@ -200,37 +200,107 @@ nav:nth-child(1) {
     margin-top: 100px;
 }
 
-.die {
+#makeRoll {
+    padding: 5px;
+}
+
+#rollString {
+    height: 80px;
+    width: 100%;
+    margin-top: 2px;
+    margin-bottom: 5px;
+    border: 2px solid #55acee;
+    border-radius: 4px;
+    background-color: #55acee61;
+    padding: 10px;
+    min-height: 50px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    font-size: 1.7em
+}
+
+.makeRollSubmit {
+    font-weight: bold;
+    font-size: 3em;
+    width: 100%;
+    margin-top: 2px;
+    margin-bottom: -10px;
+    border: 2px solid #55acee;
+    border-radius: 4px;
+    background-color: #2598f0;
+    padding: 10px;
+    min-height: 50px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+}
+
+.roll {
     width: 95%;
-    margin: 0 auto;
     margin-top: 2px;
     margin-bottom: 2px;
     border: 2px solid #55acee;
     border-radius: 4px;
     background-color: #55acee;
     padding: 10px;
-    min-height:60px;
+    min-height: 50px;
+    max-height: 200px;
     overflow: hidden;
+    display: flex;
+    flex-direction: row;
 }
 
-.die:hover {
+body {
+    overflow-y: hidden;
+}
+
+#content {
+    background-color: #d8ebf9;
+    height: 100vh;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='126' height='84' viewBox='0 0 126 84'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%2354acee' fill-opacity='0.52'%3E%3Cpath d='M126 83v1H0v-2h40V42H0v-2h40V0h2v40h40V0h2v40h40V0h2v83zm-2-1V42H84v40h40zM82 42H42v40h40V42zm-50-6a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm96 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm-42 0a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm30-12a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM20 54a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm12 24a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM8 54a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm24 0a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM8 78a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm12 0a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm54 0a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM50 54a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm24 0a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM50 78a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm54-12a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm12 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM92 54a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm24 0a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM92 78a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm24-42a4 4 0 1 1 0-8 4 4 0 0 1 0 8z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.roll:hover {
     transition: border-color 0.2s ease-out;
     border-color: rgba(255,255,255, 0.8);
     transition: background-color 2.6s ease-out;
     background-color: #66bfff;
 }
 
-img.dieFace {
-    margin-left: 25px;
-    margin-right: 10px;
-    height: 50px;
-    width: 50px;
-    border-radius: 4px;
-    margin-top:10px;
-    float:left;
+.rollDiceButton, .deleteDiceButton {
+    border: 0px;
+    border-radius: 5px;
+    width: 15%;
+    margin: 3px 5px;
+}
+.rollDiceButton>svg {
+    width: 60%;
+    
+    filter: invert(27%) sepia(97%) saturate(535%) hue-rotate(84deg) brightness(89%) contrast(84%);
 }
 
-h3.emptyDie {
+.deleteDiceButton>svg {
+    width: 40%;
+    filter: invert(16%) sepia(33%) saturate(4156%) hue-rotate(343deg) brightness(89%) contrast(96%);
+}
+
+.rollDiceButton {
+    background-color: #3af262;
+}
+
+.deleteDiceButton {
+    background-color: #f23a3a;
+    
+}
+
+img.rollFace {
+    margin: auto 5px;
+    height: 50px;
+    width: 50px;
+}
+
+h3.emptyRoll {
     width: 400px;
     font-size: 1.5em;
     margin: 0 auto;
@@ -238,21 +308,48 @@ h3.emptyDie {
     margin-top: 18px;
 }
 
-h3.dieName {
-    float:left;
-    width: 200px;
+h3.rollName {
+    width: 60%;
+    flex-grow: 1;
+    margin: auto 0px;
     font-weight: bold;
-    padding-left: 65px;
+    padding-left: 10px;
     font-size: 1.5em;
 }
 
-h3.dieLevel {
-    font-weight: bold;
-    font-size: 1.5em;
+#app {
+    
 }
 
-h3.dieAge {
-    float:right;
+#rollInputs {
+    padding: 1vh;
+    height: 10vh;
+}
+
+.rollList {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    width: 20vw;
+    height: 81vh;
+    flex-grow: 1;
+    overflow: auto;
+    align-content: flex-start;
+}
+
+.rollList > .roll {
+      box-sizing: content-box; /* so padding doesn't mess up width */
+      padding: 5px; /* optional */
+    margin: 5px;
+}
+
+#mainContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+h3.rollAge {
+    float: right;
     text-align: left;
     width: 100px;
     font-weight: bold;
@@ -260,10 +357,31 @@ h3.dieAge {
     font-size: 1.5em;
 }
 
-.die:first-child {
-    margin-top: 10px;
+#statistics {
+    width: calc(min(50vw, 100vh));
 }
 
-.die:last-child {
-    margin-bottom:10px;
+.hidden {
+    filter: blur(2rem);
+}
+
+#results {
+    margin: auto;
+    padding: 10vh 0 0 0;
+    width: 100vw;
+    height: 80vh;   
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#final-roll {
+    margin: 0;
+    font-size: 4em;
+}
+
+#premium-output {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
