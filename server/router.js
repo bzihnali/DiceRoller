@@ -23,7 +23,7 @@ const router = (app) => {
 
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
 
-  app.use((req, res, next) => {
+  app.use((req, res) => {
     res.redirect('/');
   });
 };

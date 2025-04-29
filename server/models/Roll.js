@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
-const _ = require('underscore');
 
-const setName = (name) => _.escape(name).trim();
 const setRollString = (rollstring) => rollstring;
 
 const RollSchema = new mongoose.Schema({
@@ -26,14 +24,19 @@ RollSchema.methods.parseRollString = function () {
   const dicePattern = /\d+d(\d+|\[.*?\])/g;
   const parts = [];
 
-  const matches = [...this.rollstring.matchAll(dicePattern)];
+  const matches = Array.from(this.rollstring.matchAll(dicePattern));
 
   // Strict validation: Check that the whole rollstring is valid
   let lastIndex = 0;
 
-  for (const match of matches) {
+  matches.forEach((match) => {
     if (match.index !== lastIndex) {
-      throw new Error(`Invalid input between positions ${lastIndex} and ${match.index}: "${this.rollstring.slice(lastIndex, match.index)}"`);
+      throw new Error(
+        `Invalid input between positions ${lastIndex} and ${match.index}: "${this.rollstring.slice(
+          lastIndex,
+          match.index,
+        )}"`,
+      );
     }
 
     const count = parseInt(match[0].split('d')[0], 10);
@@ -60,11 +63,13 @@ RollSchema.methods.parseRollString = function () {
     if (this.rollstring[lastIndex] === '+') {
       lastIndex += 1; // skip '+'
     }
-  }
+  });
 
   // After all matches, if anything remains, it's invalid
   if (lastIndex !== this.rollstring.length) {
-    throw new Error(`Unexpected trailing input at position ${lastIndex}: "${this.rollstring.slice(lastIndex)}"`);
+    throw new Error(
+      `Unexpected trailing input at position ${lastIndex}: "${this.rollstring.slice(lastIndex)}"`,
+    );
   }
 
   return parts;
@@ -74,63 +79,66 @@ RollSchema.methods.generatePMF = function () {
   let totalPMF = {};
   const dice = this.parseRollString(this.rollstring);
 
-  for (const die of dice) {
+  dice.forEach((die) => {
     const diePMF = {};
+
     if (Array.isArray(die.sides)) {
-      for (const side of die.sides) {
-        if (!(side in diePMF)) {
-          diePMF[side] = 1;
-        } else {
-          diePMF[side] += 1;
-        }
-      }
+      die.sides.forEach((side) => {
+        diePMF[side] = (diePMF[side] || 0) + 1;
+      });
     } else {
-      for (let i = 1; i < die.sides + 1; i++) {
+      for (let i = 1; i <= die.sides; i++) {
         diePMF[i] = 1;
       }
     }
 
     for (let i = 0; i < die.count; i++) {
       const convolvedPMF = {};
+
       if (i === 0 && Object.entries(totalPMF).length === 0) {
         totalPMF = diePMF;
       } else {
-        for (const [aStr, countA] of Object.entries(totalPMF)) {
+        Object.entries(totalPMF).forEach(([aStr, countA]) => {
           const a = parseInt(aStr, 10);
 
-          for (const [bStr, countB] of Object.entries(diePMF)) {
+          Object.entries(diePMF).forEach(([bStr, countB]) => {
             const b = parseInt(bStr, 10);
             const sum = a + b;
             const count = countA * countB;
 
             convolvedPMF[sum] = (convolvedPMF[sum] || 0) + count;
-          }
-        }
+          });
+        });
+
         totalPMF = convolvedPMF;
       }
     }
-  }
+  });
 
   return totalPMF;
 };
 
 RollSchema.methods.rollDice = function () {
-  const total = 0;
   const rollArray = [];
-  for (const die of this.parseRollString()) {
+  const parsedDice = this.parseRollString();
+
+  parsedDice.forEach((die) => {
     let dieArray = [];
+
     if (Array.isArray(die.sides)) {
       dieArray = die.sides;
     } else {
-      for (let i = 0; i < die.sides; i++) {
-        dieArray.push(i + 1);
+      // push numbers 1 through die.sides
+      for (let i = 1; i <= die.sides; i++) {
+        dieArray.push(i);
       }
     }
 
     for (let i = 0; i < die.count; i++) {
-      rollArray.push(dieArray[Math.floor(Math.random() * dieArray.length)]);
+      const roll = dieArray[Math.floor(Math.random() * dieArray.length)];
+      rollArray.push(roll);
     }
-  }
+  });
 
   return rollArray;
 };
@@ -139,15 +147,17 @@ RollSchema.methods.getPercentile = function (value) {
   let totalRolls = 0;
   let rollsBelow = 0;
   const pmf = this.generatePMF();
-  for (const probKey in pmf) {
-    if (pmf.hasOwnProperty(probKey)) {
-      if (probKey <= value) {
-        rollsBelow += pmf[probKey];
-      }
-      totalRolls += pmf[probKey];
+
+  Object.entries(pmf).forEach(([probKey, count]) => {
+    const numericKey = parseInt(probKey, 10);
+
+    if (numericKey <= value) {
+      rollsBelow += count;
     }
-  }
-  return 100 * rollsBelow / totalRolls;
+    totalRolls += count;
+  });
+
+  return (100 * rollsBelow) / totalRolls;
 };
 
 RollSchema.methods.getMean = function () {
@@ -155,15 +165,14 @@ RollSchema.methods.getMean = function () {
   let result = 0;
   let totalRolls = 0;
 
-  for (const probKey in pmf) {
-    if (pmf.hasOwnProperty(probKey)) {
-      totalRolls += pmf[probKey];
-      result += probKey * pmf[probKey];
-    }
-  }
+  Object.entries(pmf).forEach(([probKey, count]) => {
+    const numericKey = parseInt(probKey, 10);
+    totalRolls += count;
+    result += numericKey * count;
+  });
 
   const factor = 10 ** 8;
-  result = Math.round(result / totalRolls * factor) / factor;
+  result = Math.round((result / totalRolls) * factor) / factor;
 
   return result;
 };
@@ -174,34 +183,31 @@ RollSchema.methods.getPercentileValue = function (percentile) {
   }
 
   const pmf = this.generatePMF();
-  const entries = [];
 
-  // Turn PMF into sorted array of [value, frequency]
-  for (const probKey in pmf) {
-    if (pmf.hasOwnProperty(probKey)) {
-      entries.push([parseInt(probKey, 10), pmf[probKey]]);
-    }
-  }
+  // Convert PMF to sorted array of [value, frequency]
+  const entries = Object.entries(pmf)
+    .map(([key, freq]) => [parseInt(key, 10), freq])
+    .sort((a, b) => a[0] - b[0]);
 
-  entries.sort((a, b) => a[0] - b[0]); // Sort by roll value
-
-  const totalRolls = entries.reduce((sum, [_, freq]) => sum + freq, 0);
+  const totalRolls = entries.reduce((sum, [, freq]) => sum + freq, 0);
 
   let cumulative = 0;
-  for (const [value, freq] of entries) {
+  let result = entries[entries.length - 1][0]; // default to max in case not found
+
+  entries.some(([value, freq]) => {
     cumulative += freq;
-
     if (cumulative / totalRolls >= percentile) {
-      return value;
+      result = value;
+      return true; // break early
     }
-  }
+    return false;
+  });
 
-  // Edge case: if somehow not found, return largest value
-  return entries[entries.length - 1][0];
+  return result;
 };
 
 RollSchema.methods.isValid = function () {
-  return RollSchema.methods.parseRollString(this.rollstring).length != 0;
+  return RollSchema.methods.parseRollString(this.rollstring).length !== 0;
 };
 
 RollSchema.statics.toAPI = (doc) => ({

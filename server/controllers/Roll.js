@@ -16,7 +16,7 @@ const makeRoll = async (req, res) => {
 
   try {
     const newRoll = new Roll(rollData);
-    if (newRoll.parseRollString().length != 0) {
+    if (newRoll.parseRollString().length !== 0) {
       await newRoll.save();
       return res.status(201).json({ rollstring: newRoll.rollstring });
     }
@@ -65,10 +65,9 @@ const generateRollResults = async (req, res) => {
 
 const deleteRoll = async (req, res) => {
   try {
-    console.log(req.body);
     const query = { owner: req.session.account._id, _id: req.body.id };
     const result = await Roll.deleteOne(query);
-    if (result.deletedCount == 1) {
+    if (result.deletedCount === 1) {
       return res.status(200).json({ message: 'Roll successfully deleted!' });
     }
     return res.status(204).json({ message: 'Roll not found!' });
