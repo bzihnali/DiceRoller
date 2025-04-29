@@ -72,5 +72,25 @@ AccountSchema.statics.authenticate = async (username, password, callback) => {
   }
 };
 
+AccountSchema.statics.changePassword = async (username, password, newPassword, callback) => {
+  try {
+    const doc = await AccountModel.findOne({ username }).exec();
+
+    if (!doc) {
+      return callback();
+    }
+
+    const match = await bcrypt.compare(password, doc.password);
+    if (match) {
+      doc.password = await AccountModel.generateHash(newPassword);
+      await doc.save();
+      return callback(null, doc);
+    }
+    return callback('Incorrect password!');
+  } catch (err) {
+    return callback(err);
+  }
+};
+
 AccountModel = mongoose.model('Account', AccountSchema);
 module.exports = AccountModel;

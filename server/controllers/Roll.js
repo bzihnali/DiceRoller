@@ -1,9 +1,8 @@
 const models = require('../models');
-const Roll = models.Roll;
 
-const makerPage = async (req, res) => {
-  return res.render('app');
-};
+const { Roll } = models;
+
+const makerPage = async (req, res) => res.render('app');
 
 const makeRoll = async (req, res) => {
   if (!req.body.rollstring) {
@@ -20,9 +19,8 @@ const makeRoll = async (req, res) => {
     if (newRoll.parseRollString().length != 0) {
       await newRoll.save();
       return res.status(201).json({ rollstring: newRoll.rollstring });
-    } else {
-      return res.status(400).json({ error: 'Invalid rollstring!' });
     }
+    return res.status(400).json({ error: 'Invalid rollstring!' });
   } catch (err) {
     console.log(err);
     if (err.code === 11000) {
@@ -30,7 +28,7 @@ const makeRoll = async (req, res) => {
     }
     return res.status(500).json({ error: 'An error occurred making roll!' });
   }
-}
+};
 
 const getRolls = async (req, res) => {
   try {
@@ -48,38 +46,37 @@ const generateRollResults = async (req, res) => {
   try {
     const query = { owner: req.session.account._id, _id: req.body.id };
     const doc = await Roll.findOne(query);
-    let diceResult = doc.rollDice();
-    let valueRolled = diceResult.reduce((accum, a) => accum + a, 0);
+    const diceResult = doc.rollDice();
+    const valueRolled = diceResult.reduce((accum, a) => accum + a, 0);
     return res.status(200).json({
-      rolls: diceResult, 
+      rolls: diceResult,
       rollTotal: valueRolled,
       rollPMF: doc.generatePMF(),
       rollMean: doc.getMean(),
       rollPercentile: doc.getPercentile(valueRolled),
       rollQuartiles: [doc.getPercentileValue(0.25), doc.getPercentileValue(0.75)],
-      rollTenths: [doc.getPercentileValue(0.1), doc.getPercentileValue(0.9)]
-    })
+      rollTenths: [doc.getPercentileValue(0.1), doc.getPercentileValue(0.9)],
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: 'Error rolling dice!' });
   }
-}
+};
 
 const deleteRoll = async (req, res) => {
   try {
-    console.log(req.body)
+    console.log(req.body);
     const query = { owner: req.session.account._id, _id: req.body.id };
     const result = await Roll.deleteOne(query);
     if (result.deletedCount == 1) {
       return res.status(200).json({ message: 'Roll successfully deleted!' });
-    } else {
-      return res.status(204).json({ message: 'Roll not found!' });
     }
+    return res.status(204).json({ message: 'Roll not found!' });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: 'Error deleting roll! (most likely invalid ID)' });
   }
-}
+};
 
 module.exports = {
   makerPage,

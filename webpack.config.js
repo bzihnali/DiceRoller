@@ -4,6 +4,10 @@ module.exports = {
     entry: {
         app: './client/maker.jsx',
         login: './client/login.jsx',
+        changePassword: './client/changePassword.jsx',
+    },
+    devServer: {
+        https: true
     },
     module: {
         rules: [

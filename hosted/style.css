@@ -137,6 +137,21 @@ nav:nth-child(1) {
     border-radius: 6px;
 }
 
+#togglePremium {
+    transition: background-color 0.4s ease;
+    display: block;
+    text-align: center;
+    width: 8vw;
+    margin: 0 auto;
+    margin-top: 14px;
+    background-color: #55acee;
+    border-radius: 2px;
+    border-color: #66acee;
+    padding: 3px 0px;
+    color: white;
+    text-decoration: none;
+}
+
 #user:focus, #pass:focus, #pass2:focus {
     outline: none;
     box-shadow: 0px 0px 1px 1px #55acee;

@@ -171,8 +171,54 @@ export default function RollDistributionChart({ diceRolls, highlightValue, mean,
     return <Bar data={chartData} options={options} />;
 }
 
+const RollResults = ({ rollData, showPremium, togglePremium }) => {
+    if (!rollData) return null;
+
+    return (
+        <div id="results">
+            <h2 id="main-result">Your roll was...</h2>
+            <h1 id="final-roll"><b>{rollData.rollTotal}</b></h1>
+            <h3 id="roll-numbers">Dice Values: {rollData.rolls.join(', ')}</h3>
+
+            <div id="premium-output" className={showPremium ? "" : "hidden"}>
+                <h3 id="roll-statistics">
+                    Your roll was better than {Math.round(100 * rollData.rollPercentile) / 100}% of all possible rolls!<br />
+                    Avg. Roll: {rollData.rollMean}<br />
+                    10% Roll: {rollData.rollTenths[0]}<br />
+                    25% Roll: {rollData.rollQuartiles[0]}<br />
+                    75% Roll: {rollData.rollQuartiles[1]}<br />
+                    90% Roll: {rollData.rollTenths[1]}
+                </h3>
+                <div id="statistics">
+                    <RollDistributionChart
+                        diceRolls={rollData.rollPMF}
+                        highlightValue={rollData.rollTotal}
+                        mean={rollData.rollMean}
+                        quartiles={rollData.rollQuartiles}
+                        tenths={rollData.rollTenths}
+                    />
+                </div>
+            </div>
+
+            <button id="togglePremium" onClick={togglePremium}>
+                Toggle Premium Output
+            </button>
+        </div>
+    );
+};
+
+
 const App = () => {
     const [reloadRolls, setReloadRolls] = useState(false);
+    const [rollData, setRollData] = useState(null); 
+    const [showPremium, setShowPremium] = useState(true);
+
+    const handleGenerateRollResults = async (id) => {
+        await helper.sendPost('/generateRollResults', { id }, (json) => {
+            setRollData(json);
+            setShowPremium(true);
+        });
+    };
 
     return (
         <div id="mainContainer">
@@ -182,51 +228,25 @@ const App = () => {
                     <RollForm triggerReload={() => { setReloadRolls(!reloadRolls) }} />
                 </div>
                 <div id="rolls">
-                    <RollList rolls={[]} triggerReload={() => { setReloadRolls(!reloadRolls) }} reloadRolls={reloadRolls}
-                        deleteRoll={
-                            async (id) => {
-                                await helper.sendPost('/delete', { "id": id })
-                            }
-                        }
-                        generateRollResults={
-                            async (id) => {
-                                await helper.sendPost('/generateRollResults', { "id": id },
-                                    (json) => {
-                                        document.getElementById("main-result").innerHTML = `Your roll was...`
-                                        document.getElementById("final-roll").innerHTML = `<b>${json.rollTotal}</b>`
-                                        document.getElementById("roll-numbers").innerHTML = `Dice Values: ${json.rolls.join(", ")}`
-                                        document.getElementById("roll-statistics").innerHTML = `Your roll was better than ${Math.round(100 * json.rollPercentile) / 100}% of all possible rolls!<br>
-                                                                                                Avg. Roll: ${json.rollMean}<br>
-                                                                                                25% Roll:  ${json.rollQuartiles[0]}<br>
-                                                                                                75% Roll:  ${json.rollQuartiles[1]}<br>
-                                                                                                10% Roll:  ${json.rollTenths[0]}<br>
-                                                                                                90% Roll:  ${json.rollTenths[1]}`
-
-                                        document.getElementById("statistics").innerHTML = ""
-                                        createRoot(document.getElementById("statistics")).render(<RollDistributionChart diceRolls={json.rollPMF} highlightValue={json.rollTotal} mean={json.rollMean} quartiles={json.rollQuartiles} tenths={json.rollTenths} />)
-                                    })
-                            }
-                        } />
+                    <RollList
+                        rolls={[]}
+                        triggerReload={() => { setReloadRolls(!reloadRolls) }}
+                        reloadRolls={reloadRolls}
+                        deleteRoll={async (id) => { await helper.sendPost('/delete', { id }) }}
+                        generateRollResults={handleGenerateRollResults}
+                    />
                 </div>
             </div>
 
-            <div id="results">
-                <h2 id="main-result"></h2>
-                <h1 id="final-roll"></h1>
-                <h3 id="roll-numbers"></h3>
-                <div id="premium-output" class="hidden">
-                    <h3 id="roll-statistics"></h3>
-                    <div id="statistics">
-
-                    </div>
-                </div>
-                <button id="togglePremium" onClick={(e) => {
-                    document.getElementById("premium-output").classList.toggle("hidden");
-                }}>Toggle Premium Output</button>
-            </div>
+            <RollResults
+                rollData={rollData}
+                showPremium={showPremium}
+                togglePremium={() => setShowPremium(!showPremium)}
+            />
         </div>
     );
 };
+
 
 const init = () => {
     const root = createRoot(document.getElementById('app'));
