@@ -28,7 +28,8 @@ RollSchema.methods.parseRollString = function () {
 
   // Strict validation: Check that the whole rollstring is valid
   let lastIndex = 0;
-
+  let totalSides = 0;
+  
   matches.forEach((match) => {
     if (match.index !== lastIndex) {
       throw new Error(
@@ -41,6 +42,7 @@ RollSchema.methods.parseRollString = function () {
 
     const count = parseInt(match[0].split('d')[0], 10);
     const sidesRaw = match[1];
+    
 
     if (sidesRaw.startsWith('[')) {
       try {
@@ -48,12 +50,14 @@ RollSchema.methods.parseRollString = function () {
         if (!Array.isArray(sides)) {
           throw new Error(`Custom sides must be an array: got ${sidesRaw}`);
         }
+        totalSides += count * sides.length;
         parts.push({ count, sides });
       } catch (e) {
         throw new Error(`Failed to parse custom dice sides: ${sidesRaw}: ${e.message}`);
       }
     } else {
       const sides = parseInt(sidesRaw, 10);
+      totalSides += count * sides;
       parts.push({ count, sides });
     }
 
@@ -69,6 +73,12 @@ RollSchema.methods.parseRollString = function () {
   if (lastIndex !== this.rollstring.length) {
     throw new Error(
       `Unexpected trailing input at position ${lastIndex}: "${this.rollstring.slice(lastIndex)}"`,
+    );
+  }
+
+  if (totalSides > 2048) {
+    throw new Error(
+      `Too many possibilities! The cap is 4096, your roll has ${totalSides}!`,
     );
   }
 

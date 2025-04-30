@@ -40,8 +40,8 @@ const RollForm = (props) => {
             method="POST"
             className="rollForm">
 
-            <label htmlFor="name"></label>
-            <input id="rollString" type="text" name="name" placeholder="Roll String (e.x. 4d8+9d[1,2,5]+7d1)" />
+            <label htmlFor="name">Example Rollstring: 4d8+9d[1,2,5]+7d1 (cap of 2048 possibilities [64d64])</label>
+            <input id="rollString" type="text" name="name" placeholder="Insert rollstring here" />
 
             <input className="makeRollSubmit" type="submit" value="Add Roll" />
         </form>
@@ -189,19 +189,17 @@ const RollResults = ({ rollData, showPremium, togglePremium }) => {
                     75% Roll: {rollData.rollQuartiles[1]}<br />
                     90% Roll: {rollData.rollTenths[1]}
                 </h3>
-                <div id="statistics">
-                    <RollDistributionChart
-                        diceRolls={rollData.rollPMF}
-                        highlightValue={rollData.rollTotal}
-                        mean={rollData.rollMean}
-                        quartiles={rollData.rollQuartiles}
-                        tenths={rollData.rollTenths}
-                    />
-                </div>
+                <RollDistributionChart
+                    diceRolls={rollData.rollPMF}
+                    highlightValue={rollData.rollTotal}
+                    mean={rollData.rollMean}
+                    quartiles={rollData.rollQuartiles}
+                    tenths={rollData.rollTenths}
+                />
             </div>
 
             <button id="togglePremium" onClick={togglePremium}>
-                Toggle Premium Output
+                Click to try Premium free!
             </button>
         </div>
     );
@@ -211,12 +209,11 @@ const RollResults = ({ rollData, showPremium, togglePremium }) => {
 const App = () => {
     const [reloadRolls, setReloadRolls] = useState(false);
     const [rollData, setRollData] = useState(null); 
-    const [showPremium, setShowPremium] = useState(true);
+    const [showPremium, setShowPremium] = useState(false);
 
     const handleGenerateRollResults = async (id) => {
         await helper.sendPost('/generateRollResults', { id }, (json) => {
             setRollData(json);
-            setShowPremium(true);
         });
     };
 
