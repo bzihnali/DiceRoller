@@ -41,7 +41,10 @@ const RollForm = (props) => {
             className="rollForm">
 
             <label id="instructions" htmlFor="name">A rollstring is a series of dice.<br />
-                                                    An example: 4d8+9d[1,2,5]+7d1 would roll 4 8-sided dice, 9 dice with the sides 1, 2, and 5, and 4 1-sided dice (adding 4 to the total value).
+                                                    An example: 4d8+9d[1,2,5]+7d1 would roll: <br />
+                                                    4 8-sided dice, <br />
+                                                    9 dice with the sides 1, 2, and 5, <br />
+                                                    and 7 1-sided dice (adding 7 to the total value).<br />
                                                     There is a cap on how many total sides the rollstring can have, 2048 [an example would be 64d32.]</label>
             <input id="rollString" type="text" name="name" placeholder="Insert rollstring here" />
 

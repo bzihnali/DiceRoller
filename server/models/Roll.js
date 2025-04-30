@@ -57,6 +57,9 @@ RollSchema.methods.parseRollString = function () {
       }
     } else {
       const sides = parseInt(sidesRaw, 10);
+      if (sides === 0) {
+        throw new Error(`You cannot have a 0-sided die!`);
+      }
       totalSides += count * sides;
       parts.push({ count, sides });
     }
@@ -78,7 +81,7 @@ RollSchema.methods.parseRollString = function () {
 
   if (totalSides > 2048) {
     throw new Error(
-      `Too many possibilities! The cap is 4096, your roll has ${totalSides}!`,
+      `Too many possibilities! The cap is 2048, your roll has ${totalSides}!`,
     );
   }
 

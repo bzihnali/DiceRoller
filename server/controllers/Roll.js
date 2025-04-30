@@ -26,7 +26,7 @@ const makeRoll = async (req, res) => {
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Roll already exists!' });
     }
-    return res.status(500).json({ error: 'An error occurred making roll!' });
+    return res.status(500).json({ error: err.message });
   }
 };
 
