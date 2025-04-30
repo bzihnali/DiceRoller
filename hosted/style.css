@@ -332,20 +332,24 @@ h3.rollName {
     font-size: 1.5em;
 }
 
+#instructions {
+    font-size: 25px;
+}
+
 #app {
     
 }
 
 #rollInputs {
     padding: 1vh;
-    height: 10vh;
+    width: 30vw;
 }
 
 .rollList {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
-    width: 20vw;
+    width: 100%;
     height: 81vh;
     flex-grow: 1;
     overflow: auto;

@@ -40,7 +40,9 @@ const RollForm = (props) => {
             method="POST"
             className="rollForm">
 
-            <label htmlFor="name">Example Rollstring: 4d8+9d[1,2,5]+7d1 (cap of 2048 possibilities [64d64])</label>
+            <label id="instructions" htmlFor="name">A rollstring is a series of dice.<br />
+                                                    An example: 4d8+9d[1,2,5]+7d1 would roll 4 8-sided dice, 9 dice with the sides 1, 2, and 5, and 4 1-sided dice (adding 4 to the total value).
+                                                    There is a cap on how many total sides the rollstring can have, 2048 [an example would be 64d32.]</label>
             <input id="rollString" type="text" name="name" placeholder="Insert rollstring here" />
 
             <input className="makeRollSubmit" type="submit" value="Add Roll" />
